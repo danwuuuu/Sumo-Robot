@@ -1,0 +1,114 @@
+(set up sensors and motors)
+
+int motorAencoder = 0;
+int motorDencoder = 0;
+int colour = SensorValue[S1];
+int distance = SensorValue[S4];
+
+void resetEncoder();
+void updateEncoder();
+void updateSensor();
+void goForward();
+void backUp();
+void turn180();
+
+task main()
+{
+    //Begining  
+    //Robot is moving forward till it sees the white line
+    while(colour <= 60){
+	updateSensor();
+	goForward();
+    }
+
+    //After see the white line (back up and turn 180 degrees)
+    resetEncoder();
+    while(motorAencoder < 360 && motorDencoder < 360){
+	backUp();
+	updateEncoder();
+    }
+    turn180();
+
+    //Goes to center
+    resetEncoder();
+    while(motorAencoder >= -660 && motorDencoder >= -660){	//not sure about number
+	goForward();
+	updateEncoder();
+    }
+
+   //Searching and Attack
+   while(1){
+	//Read colour & distance value
+	updateSensor();
+
+	//When robot at the edge (White line case)
+	if(colour > 60){
+	    //Robot turn backward
+	    motor[motorA] = 100;	//not sure about speed of motor
+	    motor[motorD] = 50;
+	}
+	//When light sensor see black
+	else{
+	    //Object is in the front
+	    if(distance < 40){		//If it doesn't work try while loop
+		goForward();
+	    }
+	    else{
+		resetEncoder();
+		while(motorDencoder >= -1500*2){	//not sure about number (try to make it turn 360 degrees)
+		    updateSensor();
+		    if(disrance < 40){
+			motor[motorA] = 0;	//not sure (stop motor)
+    		    	motor[motorD] = 0;
+			break;			//not sure (might affected by the following while loop)
+		    }
+		    motor[motorA] = 100;
+    		    motor[motorD] = -100;
+		    updateEncoder();
+		}
+		//if turn one round and still cannot find an object
+		resetEncoder();
+		while(motorAencoder >= -360 && motorDencoder >= -360){
+		   goForward();
+		   updateEncoder();
+		}
+	    }
+	    
+}
+
+void updateEncoder(){
+    motorAencoder = getMotorEncoder(motorA);
+    motorDencoder = getMotorEncoder(motorD);
+}
+
+void updateSensor(){
+    colour = SensorValue[S1];
+    distance = SensorValue[S4];
+}
+
+void resetEncoder(){
+    resetMotorEncoder(motorA);
+    resetMotorEncoder(motorD);
+    updateEncoder();
+}
+
+void goForward(){
+    motor[motorA] = -100;
+    motor[motorD] = -100;
+}
+
+void backUp(){
+    motor[motorA] = 100;
+    motor[motorD] = 100;
+}
+
+void turn180(){
+    resetEncoder();
+    while(motorDencoder >= -1500){	//not sure about the number yet
+	motor[motorA] = 100;
+    	motor[motorD] = -100;
+	updateEncoder();
+    }
+}
+
+
